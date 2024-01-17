@@ -102,74 +102,74 @@ func (d DateRange) Intersection(other DateRange) DateRange {
 func (d DateRange) Union(other DateRange) DateRanges {
 	switch {
 	case d.IsZero() && other.IsZero():
-		return DateRanges{}
+		return NewDateRanges()
 	case d.IsZero():
-		return DateRanges{other}
+		return NewDateRanges(other)
 	case other.IsZero():
-		return DateRanges{d}
+		return NewDateRanges(d)
 	}
 
 	// non zero, check for overlapping
 	if d.Overlaps(other) {
-		return DateRanges{
-			{
+		return NewDateRanges(
+			DateRange{
 				from: minTime(d.from, other.from),
 				to:   maxTime(d.to, other.to),
 			},
-		}
+		)
 	}
 
 	// non zero, no overlapping, check for adjacent
 	if d.to.AddDate(0, 0, 1).Equal(other.from) {
-		return DateRanges{
-			{
+		return NewDateRanges(
+			DateRange{
 				from: d.from,
 				to:   other.to,
 			},
-		}
+		)
 	}
 	if other.to.AddDate(0, 0, 1).Equal(d.from) {
-		return DateRanges{
-			{
+		return NewDateRanges(
+			DateRange{
 				from: other.from,
 				to:   d.to,
 			},
-		}
+		)
 	}
 
 	// non zero, no overlapping, disjoint ranges, return in ascending order
 	if d.from.Before(other.from) {
-		return DateRanges{
+		return NewDateRanges(
 			d,
 			other,
-		}
+		)
 	}
 
-	return DateRanges{
+	return NewDateRanges(
 		other,
 		d,
-	}
+	)
 }
 
 // Difference returns a ordered slice of DateRanges that are the difference of the two DateRanges
 func (d DateRange) Difference(other DateRange) DateRanges {
 	if d.IsZero() {
-		return DateRanges{}
+		return NewDateRanges()
 	}
 
 	if !d.Overlaps(other) {
-		return DateRanges{d}
+		return NewDateRanges(d)
 	}
 
-	ranges := DateRanges{}
+	ranges := NewDateRanges()
 	if other.from.After(d.from) {
-		ranges = append(ranges, DateRange{
+		ranges.Append(DateRange{
 			from: d.from,
 			to:   other.from.AddDate(0, 0, -1),
 		})
 	}
 	if other.to.Before(d.to) {
-		ranges = append(ranges, DateRange{
+		ranges.Append(DateRange{
 			from: other.to.AddDate(0, 0, 1),
 			to:   d.to,
 		})
