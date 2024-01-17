@@ -1,75 +1,62 @@
-package daterange
+package daterange_test
 
 import (
 	"reflect"
 	"testing"
 	"time"
+
+	dr "github.com/felixenescu/date-range"
 )
 
-// test DateRange.NewDateRange
+// test dr.DateRange.NewDateRange
 func TestNewDateRange(t *testing.T) {
 	cases := []struct {
 		name string
 		from time.Time
 		to   time.Time
-		want DateRange
+		want dr.DateRange
 	}{
 		{
 			name: "zero zero",
 			from: time.Time{},
 			to:   time.Time{},
-			want: DateRange{},
+			want: dr.DateRange{},
 		},
 		{
 			name: "zero non zero",
 			from: time.Time{},
 			to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			want: DateRange{
-				from: time.Time{},
-				to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			},
+			want: dr.NewDateRange(time.Time{}, time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
 		},
 		{
 			name: "non zero zero",
 			from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			to:   time.Time{},
-			want: DateRange{
-				from: time.Time{},
-				to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			},
+			want: dr.NewDateRange(time.Time{}, time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
 		},
 		{
 			name: "non zero non zero equal",
 			from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			want: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			},
+			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
 		},
 		{
 			name: "non zero non zero from before to",
 			from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			want: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			},
+			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
 		},
 		{
 			name: "non zero non zero from after to",
 			from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
 			to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			want: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			},
+			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
 		},
 	}
 	for _, c := range cases {
 		t.Logf("Running test %s", c.name)
 		t.Run(c.name, func(t *testing.T) {
-			got := NewDateRange(c.from, c.to)
+			got := dr.NewDateRange(c.from, c.to)
 			if got != c.want {
 				t.Errorf("NewDateRange(%v, %v) = %v, want %v", c.from, c.to, got, c.want)
 			}
@@ -77,52 +64,43 @@ func TestNewDateRange(t *testing.T) {
 	}
 }
 
-// test DateRange.MustNewDateRange
+// test dr.DateRange.MustNewDateRange
 func TestMustNewDateRange(t *testing.T) {
 	cases := []struct {
 		name string
 		from time.Time
 		to   time.Time
-		want DateRange
+		want dr.DateRange
 	}{
 		{
 			name: "zero zero",
 			from: time.Time{},
 			to:   time.Time{},
-			want: DateRange{},
+			want: dr.DateRange{},
 		},
 		{
 			name: "zero non zero",
 			from: time.Time{},
 			to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			want: DateRange{
-				from: time.Time{},
-				to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			},
+			want: dr.NewDateRange(time.Time{}, time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
 		},
 		{
 			name: "non zero non zero equal",
 			from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			want: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			},
+			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
 		},
 		{
 			name: "non zero non zero from before to",
 			from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			want: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			},
+			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
 		},
 	}
 	for _, c := range cases {
 		t.Logf("Running test %s", c.name)
 		t.Run(c.name, func(t *testing.T) {
-			got := MustNewDateRange(c.from, c.to)
+			got := dr.MustNewDateRange(c.from, c.to)
 			if got != c.want {
 				t.Errorf("MustNewDateRange(%v, %v) = %v, want %v", c.from, c.to, got, c.want)
 			}
@@ -142,29 +120,27 @@ func TestMustNewDateRange(t *testing.T) {
 		}
 	}()
 
-	MustNewDateRange(
+	dr.MustNewDateRange(
 		time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
 		time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 	)
 }
 
-// test DateRange.String
+// test dr.DateRange.String
 func TestDateRangeString(t *testing.T) {
 	cases := []struct {
 		name string
-		d    DateRange
+		d    dr.DateRange
 		want string
 	}{
 		{
 			name: "zero",
-			d:    DateRange{},
+			d:    dr.DateRange{},
 			want: "{0001-01-01 - 0001-01-01}",
 		},
 		{
 			name: "non zero",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
 			want: "{2019-01-01 - 2019-01-02}",
 		},
 	}
@@ -178,32 +154,26 @@ func TestDateRangeString(t *testing.T) {
 	}
 }
 
-// test DateRange.IsZero
+// test dr.DateRange.IsZero
 func TestDateRangeIsZero(t *testing.T) {
 	cases := []struct {
 		name string
-		d    DateRange
+		d    dr.DateRange
 		want bool
 	}{
 		{
 			name: "zero",
-			d:    DateRange{},
+			d:    dr.DateRange{},
 			want: true,
 		},
 		{
 			name: "zero-initialized",
-			d: DateRange{
-				from: time.Time{},
-				to:   time.Time{},
-			},
+			d:    dr.NewDateRange(time.Time{}, time.Time{}),
 			want: true,
 		},
 		{
 			name: "non-zero",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
 			want: false,
 		},
 	}
@@ -217,77 +187,59 @@ func TestDateRangeIsZero(t *testing.T) {
 	}
 }
 
-// test DateRange.Contains
+// test dr.DateRange.Contains
 func TestDateRangeContains(t *testing.T) {
 	cases := []struct {
 		name string
-		d    DateRange
+		d    dr.DateRange
 		t    time.Time
 		want bool
 	}{
 		{
 			name: "zero range, zero time",
-			d:    DateRange{},
+			d:    dr.DateRange{},
 			t:    time.Time{},
 			want: false,
 		},
 		{
 			name: "zero range, non zero time",
-			d:    DateRange{},
+			d:    dr.DateRange{},
 			t:    time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			want: false,
 		},
 		{
 			name: "non zero range, non zero time, before from",
-			d: DateRange{
-				from: time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			t:    time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			want: false,
 		},
 		{
 			name: "non zero range, non zero time, equal from",
-			d: DateRange{
-				from: time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			t:    time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
 			want: true,
 		},
 		{
 			name: "non zero range, non zero time, inside",
-			d: DateRange{
-				from: time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			t:    time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
 			want: true,
 		},
 		{
 			name: "non zero range, non zero time, equal to",
-			d: DateRange{
-				from: time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			t:    time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
 			want: true,
 		},
 		{
 			name: "non zero range, non zero time, after to",
-			d: DateRange{
-				from: time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			t:    time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC),
 			want: false,
 		},
 		{
 			name: "all equal",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
 			t:    time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			want: true,
 		},
@@ -302,136 +254,90 @@ func TestDateRangeContains(t *testing.T) {
 	}
 }
 
-// test DateRange.Overlaps
+// test dr.DateRange.Overlaps
 func TestDateRangeOverlaps(t *testing.T) {
 	cases := []struct {
 		name string
-		d    DateRange
-		o    DateRange
+		d    dr.DateRange
+		o    dr.DateRange
 		want bool
 	}{
 		{
 			name: "zero",
-			d:    DateRange{},
-			o:    DateRange{},
+			d:    dr.DateRange{},
+			o:    dr.DateRange{},
 			want: false,
 		},
 		{
 			name: "zero range, non zero other",
-			d:    DateRange{},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)},
+			d:    dr.DateRange{},
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
 			want: false,
 		},
 		{
 			name: "non zero range, zero other",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)},
-			o:    DateRange{},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			o:    dr.DateRange{},
 			want: false,
 		},
 		{
 			name: "non zero range, non zero other, before",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			want: false,
 		},
 		{
 			name: "non zero range, non zero other, after",
-			d: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
 			want: false,
 		},
 		{
 			name: "non zero range, non zero other, same from",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			want: true,
 		},
 		{
 			name: "non zero range, non zero other, same to",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			want: true,
 		},
 		{
 			name: "non zero range, non zero other, same from and to",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			want: true,
 		},
 		{
 			name: "non zero range, non zero other, inside",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			want: true,
 		},
 		{
 			name: "non zero range, non zero other, outside before",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
 			want: false,
 		},
 		{
 			name: "non zero range, non zero other, outside after",
-			d: DateRange{
-				from: time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)},
-
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
 			want: false,
 		},
 		{
 			name: "non zero range, non zero other, overlap from",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			want: true,
 		},
 		{
 			name: "non zero range, non zero other, overlap to",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
 			want: true,
 		},
 	}
@@ -445,44 +351,36 @@ func TestDateRangeOverlaps(t *testing.T) {
 	}
 }
 
-// test DateRange.Overlaps
+// test dr.DateRange.Overlaps
 func TestDateRangeIncludes(t *testing.T) {
 	cases := []struct {
 		name string
-		d    DateRange
-		o    DateRange
+		d    dr.DateRange
+		o    dr.DateRange
 		want bool
 	}{
 		{
 			name: "zero zero",
-			d:    DateRange{},
-			o:    DateRange{},
+			d:    dr.DateRange{},
+			o:    dr.DateRange{},
 			want: false,
 		},
 		{
 			name: "non-zero zero",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)},
-			o:    DateRange{},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			o:    dr.DateRange{},
 			want: false,
 		},
 		{
 			name: "zero range, non zero other",
-			d:    DateRange{},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)},
+			d:    dr.DateRange{},
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
 			want: false,
 		},
 		{
 			name: "non zero range, non zero other, before",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
 			want: false,
 		},
 	}
@@ -496,91 +394,61 @@ func TestDateRangeIncludes(t *testing.T) {
 	}
 }
 
-// test DateRange.Intersection
+// test dr.DateRange.Intersection
 func TestDateRangeIntersection(t *testing.T) {
 	cases := []struct {
 		name string
-		d    DateRange
-		o    DateRange
-		want DateRange
+		d    dr.DateRange
+		o    dr.DateRange
+		want dr.DateRange
 	}{
 		{
 			name: "zero range, zero other",
-			d:    DateRange{},
-			o:    DateRange{},
-			want: DateRange{},
+			d:    dr.DateRange{},
+			o:    dr.DateRange{},
+			want: dr.DateRange{},
 		},
 		{
 			name: "zero range, non zero other",
-			d:    DateRange{},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			want: DateRange{},
+			d:    dr.DateRange{},
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRange{},
 		},
 		{
 			name: "non zero range, zero other",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o:    DateRange{},
-			want: DateRange{},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.DateRange{},
+			want: dr.DateRange{},
 		},
 		{
 			name: "non zero range, non zero other, inside",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			want: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			want: dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
 		},
 		{
 			name: "non zero range, non zero other, outside before",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)},
-			want: DateRange{},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRange{},
 		},
 		{
 			name: "non zero range, non zero other, outside after",
-			d: DateRange{
-				from: time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)},
-			want: DateRange{},
+			d:    dr.NewDateRange(time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRange{},
 		},
 		{
 			name: "non zero range, non zero other, overlap from",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			want: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			want: dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
 		},
 		{
 			name: "non zero range, non zero other, overlap to",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			want: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			want: dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
 		},
 	}
 	for _, c := range cases {
@@ -598,253 +466,121 @@ func TestDateRangeIntersection(t *testing.T) {
 func TestDateRangeUnion(t *testing.T) {
 	cases := []struct {
 		name string
-		d    DateRange
-		o    DateRange
-		want DateRanges
+		d    dr.DateRange
+		o    dr.DateRange
+		want dr.DateRanges
 	}{
 		{
 			name: "zero range, zero other",
-			d:    DateRange{},
-			o:    DateRange{},
-			want: DateRanges{},
+			d:    dr.DateRange{},
+			o:    dr.DateRange{},
+			want: dr.DateRanges{},
 		},
 		{
 			name: "zero range, non zero other",
-			d:    DateRange{},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.DateRange{},
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, zero other",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.DateRange{},
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, outside before",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				},
-				{
-					from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, outside before, adjacent",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{
-				from: time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, outside after",
-			d: DateRange{
-				from: time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC),
-				},
-				{
-					from: time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC))},
 		}, {
 			name: "non zero range, non zero other, outside after, adjacent",
-			d: DateRange{
-				from: time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, inside",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, overlap from",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, equal from",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, overlap to",
-			d: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, equal to",
-			d: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, equal range",
-			d: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, overlap both",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{
-				from: time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, overlap both, single day",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{
-				from: time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, overlap both, single day both",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			},
-			o: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC))},
 		},
 	}
 	for _, c := range cases {
@@ -862,166 +598,99 @@ func TestDateRangeUnion(t *testing.T) {
 func TestDateRangeDifference(t *testing.T) {
 	cases := []struct {
 		name string
-		d    DateRange
-		o    DateRange
-		want DateRanges
+		d    dr.DateRange
+		o    dr.DateRange
+		want dr.DateRanges
 	}{
 		{
 			name: "zero range, zero other",
-			d:    DateRange{},
-			o:    DateRange{},
-			want: DateRanges{},
+			d:    dr.DateRange{},
+			o:    dr.DateRange{},
+			want: dr.DateRanges{},
 		},
 		{
 			name: "zero range, non zero other",
-			d:    DateRange{},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{},
+			d:    dr.DateRange{},
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{},
 		},
 		{
 			name: "non zero range, zero other",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.DateRange{},
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, outside before",
-			d: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, outside after",
-			d: DateRange{
-				from: time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 16, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, inside",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{},
 		},
 		{
 			name: "non zero range, non zero other, overlap from",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC))},
 		},
+
 		{
 			name: "non zero range, non zero other, equal from",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, overlap to",
-			d: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, equal to",
-			d: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, equal range",
-			d: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{},
+			d:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{},
 		},
 		{
 			name: "non zero range, non zero other, overlap both",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-				{
-					from: time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC))},
 		},
 		{
 			name: "non zero range, non zero other, overlap both, single day",
-			d: DateRange{
-				from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)},
-			o: DateRange{
-				from: time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC),
-				to:   time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)},
-			want: DateRanges{
-				{
-					from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)},
-				{
-					from: time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC),
-					to:   time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)},
-			},
+			d:    dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)),
+			o:    dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC)),
+			want: dr.DateRanges{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC))},
 		},
 	}
 	for _, c := range cases {
