@@ -1,6 +1,9 @@
 package daterange
 
-import "sort"
+import (
+	"sort"
+	"time"
+)
 
 // DataRanges is a collection of DateRange elements
 // TODO(felix) explain the what si merged and sorted
@@ -46,10 +49,54 @@ func (drs *DateRanges) IsZero() bool {
 	return len(drs.dr) == 0
 }
 
+// Len returns the number of elements in the collection
+func (drs *DateRanges) Len() int {
+	return len(drs.dr)
+}
+
+// FirstDate returns the first date of the collection
+func (drs *DateRanges) FirstDate() time.Time {
+	if drs.IsZero() {
+		return time.Time{}
+	}
+	return drs.dr[0].from
+}
+
+// LastDate returns the last date of the collection
+func (drs *DateRanges) LastDate() time.Time {
+	if drs.IsZero() {
+		return time.Time{}
+	}
+	return drs.dr[len(drs.dr)-1].to
+}
+
+// Equal returns true if the collection is equal to the given collection
+func (drs *DateRanges) Equal(other DateRanges) bool {
+	if len(drs.dr) != len(other.dr) {
+		return false
+	}
+	for i, dr := range drs.dr {
+		if dr != other.dr[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Append adds the given elements to the collection
 func (drs *DateRanges) Append(dataRange ...DateRange) {
 	drs.dr = append(drs.dr, dataRange...)
 	drs.normalize()
+}
+
+// Contains returns true if the given date is in the collection
+func (drs *DateRanges) Contains(date time.Time) bool {
+	for _, dr := range drs.dr {
+		if dr.Contains(date) {
+			return true
+		}
+	}
+	return false
 }
 
 // normalize sorts the collection and merges overlapping periods
