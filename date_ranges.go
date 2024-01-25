@@ -6,7 +6,6 @@ import (
 )
 
 // DataRanges is a collection of DateRange elements
-// TODO(felix) explain the what si merged and sorted
 type DateRanges struct {
 	dr []DateRange
 }
@@ -21,7 +20,8 @@ func NewDateRanges(dataRanges ...DateRange) DateRanges {
 	return drs
 }
 
-// ToSlice returns the members of the collection as a slice
+// ToSlice returns the members of the collection as a slice.
+// Items are guaranteed to be sorted and non-overlapping. Any adjacent periods are merged.
 func (drs *DateRanges) ToSlice() []DateRange {
 	copySlice := make([]DateRange, len(drs.dr))
 	copy(copySlice, drs.dr)
@@ -29,6 +29,7 @@ func (drs *DateRanges) ToSlice() []DateRange {
 }
 
 // String returns a string representation of the collection
+// Items are guaranteed to be sorted and non-overlapping. Any adjacent periods are merged.
 func (drs DateRanges) String() string {
 	if drs.IsZero() {
 		return "[]"

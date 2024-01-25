@@ -26,6 +26,7 @@ SOFTWARE.
 package daterange
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -35,7 +36,8 @@ type DateRange struct {
 	to   time.Time
 }
 
-// NewDateRange returns a new DateRange from the given dates. This automatically order input dates.
+// NewDateRange returns a new DateRange from the given dates. This automatically order input dates
+// and truncates the time portion of the dates.
 // Use MustNewDateRange if you want to panic on invalid input.
 func NewDateRange(from, to time.Time) DateRange {
 	return DateRange{
@@ -44,11 +46,12 @@ func NewDateRange(from, to time.Time) DateRange {
 	}
 }
 
-// MustNewDateRange returns a new DateRange from the given dates. This panics if the from date is after the to date.
+// MustNewDateRange returns a new DateRange from the given dates. This automatically truncates the time
+// portion of the dates. This panics if the from date is after the to date.
 // Use NewDateRange if you want to automatically order input dates.
 func MustNewDateRange(from, to time.Time) DateRange {
 	if from.After(to) {
-		panic("from date is after to date")
+		panic(fmt.Sprintf("from date (%s) is after to date (%s)", from, to))
 	}
 	return NewDateRange(from, to)
 }
@@ -98,7 +101,7 @@ func (d DateRange) Intersection(other DateRange) DateRange {
 	return DateRange{}
 }
 
-// Union returns a ordered slice of DateRanges that are the union of the two DateRanges
+// Union returns a DateRanges collection that is the union of the two DateRanges
 func (d DateRange) Union(other DateRange) DateRanges {
 	switch {
 	case d.IsZero() && other.IsZero():
@@ -151,7 +154,7 @@ func (d DateRange) Union(other DateRange) DateRanges {
 	)
 }
 
-// Difference returns a ordered slice of DateRanges that are the difference of the two DateRanges
+// Difference returns a DateRanges collection that is the difference of the two DateRanges
 func (d DateRange) Difference(other DateRange) DateRanges {
 	if d.IsZero() {
 		return NewDateRanges()
