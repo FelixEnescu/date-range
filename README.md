@@ -78,7 +78,7 @@ func main() {
 
 	dateToCheck := time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC)
 	fmt.Println("Date within range:", dateRange.Contains(dateToCheck))
-    // Date within range: true
+	// Date within range: true
 }
 ```
 
@@ -98,7 +98,7 @@ func main() {
 	secondRange := dr.NewDateRange(time.Date(2024, 5, 1, 0, 0, 0, 0, time.UTC), time.Date(2024, 12, 31, 0, 0, 0, 0, time.UTC))
 
 	fmt.Println("Ranges overlap:", firstRange.Overlaps(secondRange))
-    // Ranges overlap: true
+	// Ranges overlap: true
 }
 ```
 
@@ -120,7 +120,7 @@ func main() {
 
 	unionRanges := firstRange.Union(secondRange)
 	fmt.Println(unionRanges)
-    // [{2024-01-01 - 2024-06-30}]
+	// [{2024-01-01 - 2024-06-30}]
 }
 ```
 
@@ -142,7 +142,7 @@ func main() {
 
 	diffRanges := firstRange.Difference(secondRange)
 	fmt.Println(diffRanges)
-    // [{2024-01-01 - 2024-01-31} {2024-03-11 - 2024-03-31}]
+	// [{2024-01-01 - 2024-01-31} {2024-03-11 - 2024-03-31}]
 }
 
 ```
