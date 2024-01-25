@@ -112,7 +112,7 @@ func TestMustNewDateRange(t *testing.T) {
 		if r := recover(); r == nil {
 			t.Errorf("MustNewDateRange() should have panicked")
 		} else {
-			if r == "from date is after to date" {
+			if r == "from date (2019-01-02 03:04:05.000000006 +0000 UTC) is after to date (2019-01-01 06:05:04.000000003 +0000 UTC)" {
 				t.Logf("MustNewDateRange() panicked with correct message: %v", r)
 			} else {
 				t.Errorf("MustNewDateRange() panicked with wrong message: %v", r)
@@ -120,9 +120,10 @@ func TestMustNewDateRange(t *testing.T) {
 		}
 	}()
 
+	// test panic case
 	dr.MustNewDateRange(
-		time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-		time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2019, 1, 2, 3, 4, 5, 6, time.UTC),
+		time.Date(2019, 1, 1, 6, 5, 4, 3, time.UTC),
 	)
 }
 

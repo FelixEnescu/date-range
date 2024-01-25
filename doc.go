@@ -23,9 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Package daterange provides a detailed description of the
-// package's purpose, functionality, usage, and any other relevant
-// information. This description can span multiple lines.
-//
-// More detailed information can be added here.
+// Package daterange is a powerful and intuitive Go package designed for handling
+// date intervals efficiently and effectively. This library simplifies operations
+// such as comparing dates, checking overlaps, and processing date ranges in Go
+// applications.
 package daterange
