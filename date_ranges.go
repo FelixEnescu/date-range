@@ -100,6 +100,34 @@ func (drs *DateRanges) Contains(date time.Time) bool {
 	return false
 }
 
+// IsAnyDateIn returns true if any date in the given DateRange is in the collection
+// Zero DateRange is always considered to be in the collection
+func (drs *DateRanges) IsAnyDateIn(other DateRange) bool {
+	if other.IsZero() {
+		return true
+	}
+	for _, dr := range drs.dr {
+		if dr.Overlaps(other) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsAllDateIn returns true if all dates in the given DateRange are in the collection
+// Zero DateRange is always considered to be in the collection
+func (drs *DateRanges) IsAllDateIn(other DateRange) bool {
+	if other.IsZero() {
+		return true
+	}
+	for _, dr := range drs.dr {
+		if dr.Includes(other) {
+			return true
+		}
+	}
+	return false
+}
+
 // normalize sorts the collection and merges overlapping periods
 func (drs *DateRanges) normalize() *DateRanges {
 	if len(drs.dr) == 0 {
