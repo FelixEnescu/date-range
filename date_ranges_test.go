@@ -552,19 +552,19 @@ func TestDateRangesContains(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "non zero zero",
+			name: "non empty zero",
 			drs:  []dr.DateRange{dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC))},
 			date: time.Time{},
 			want: false,
 		},
 		{
-			name: "non zero inside",
+			name: "non empty inside",
 			drs:  []dr.DateRange{dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC))},
 			date: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
 			want: true,
 		},
 		{
-			name: "non zero outside",
+			name: "non empty outside",
 			drs:  []dr.DateRange{dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC))},
 			date: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 			want: false,
@@ -603,6 +603,188 @@ func TestDateRangesContains(t *testing.T) {
 			drs := dr.NewDateRanges(c.drs...)
 			if drs.Contains(c.date) != c.want {
 				t.Errorf("NewDateRanges(%v).Contains(%v) = %v, want %v", c.drs, c.date, drs.Contains(c.date), c.want)
+			}
+		})
+	}
+}
+
+// test dr.DateRanges.IsAnyDateIn
+func TestDateRangesIsAnyDateIn(t *testing.T) {
+	cases := []struct {
+		name string
+		drs  []dr.DateRange
+		dr   dr.DateRange
+		want bool
+	}{
+		{
+			name: "empty zero",
+			drs:  []dr.DateRange{},
+			dr:   dr.NewDateRange(time.Time{}, time.Time{}),
+			want: true,
+		},
+		{
+			name: "empty non zero",
+			drs:  []dr.DateRange{},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			want: false,
+		},
+		{
+			name: "non empty zero",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Time{}, time.Time{}),
+			want: true,
+		},
+		{
+			name: "non empty overlapping",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC)),
+			want: true,
+		},
+		{
+			name: "non empty outside",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC)),
+			want: false,
+		},
+		{
+			name: "non empty inside",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC)),
+			want: true,
+		},
+		{
+			name: "multiple outside",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC)),
+			want: false,
+		},
+		{
+			name: "multiple inside",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 17, 0, 0, 0, 0, time.UTC)),
+			want: true,
+		},
+		{
+			name: "multiple overlapping",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			want: true,
+		},
+	}
+	for _, c := range cases {
+		t.Logf("Running test %s", c.name)
+		t.Run(c.name, func(t *testing.T) {
+			drs := dr.NewDateRanges(c.drs...)
+			if drs.IsAnyDateIn(c.dr) != c.want {
+				t.Errorf("NewDateRanges(%v).IsAnyDateIn(%v) = %v, want %v", c.drs, c.dr, drs.IsAnyDateIn(c.dr), c.want)
+			}
+		})
+	}
+}
+
+// test dr.DateRanges.IsAnyDateIn
+func TestDateRangesIsAllDateIn(t *testing.T) {
+	cases := []struct {
+		name string
+		drs  []dr.DateRange
+		dr   dr.DateRange
+		want bool
+	}{
+		{
+			name: "empty zero",
+			drs:  []dr.DateRange{},
+			dr:   dr.NewDateRange(time.Time{}, time.Time{}),
+			want: true,
+		},
+		{
+			name: "empty non zero",
+			drs:  []dr.DateRange{},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			want: false,
+		},
+		{
+			name: "non empty zero",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Time{}, time.Time{}),
+			want: true,
+		},
+		{
+			name: "non empty overlapping",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC)),
+			want: false,
+		},
+		{
+			name: "non empty outside",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC)),
+			want: false,
+		},
+		{
+			name: "non empty inside",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC)),
+			want: true,
+		},
+		{
+			name: "multiple outside",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 6, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 8, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC)),
+			want: false,
+		},
+		{
+			name: "multiple inside",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 17, 0, 0, 0, 0, time.UTC)),
+			want: true,
+		},
+		{
+			name: "multiple overlapping",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 4, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 18, 0, 0, 0, 0, time.UTC)),
+			},
+			dr:   dr.NewDateRange(time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			want: false,
+		},
+	}
+	for _, c := range cases {
+		t.Logf("Running test %s", c.name)
+		t.Run(c.name, func(t *testing.T) {
+			drs := dr.NewDateRanges(c.drs...)
+			if drs.IsAllDateIn(c.dr) != c.want {
+				t.Errorf("NewDateRanges(%v).IsAllDateIn(%v) = %v, want %v", c.drs, c.dr, drs.IsAllDateIn(c.dr), c.want)
 			}
 		})
 	}
