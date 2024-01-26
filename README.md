@@ -1,4 +1,5 @@
-![CI Workflow](https://github.com/felixenescu/date-range/actions/workflows/ci.yml/badge.svg)
+[![Build Status](https://github.com/felixenescu/date-range/actions/workflows/ci.yml/badge.svg)](https://github.com/felixenescu/date-range/actions/workflows/ci.yml/badge.svg)
+[![Code coverage](https://codecov.io/gh/FelixEnescu/date-range/graph/badge.svg?token=Q4A0CDVYHB)](https://codecov.io/gh/FelixEnescu/date-range)
 [![Go Report Card](https://goreportcard.com/badge/github.com/felixenescu/date-range)](https://goreportcard.com/report/github.com/felixenescu/date-range)
 [![GoDoc](https://godoc.org/github.com/felixenescu/date-range?status.svg)](http://godoc.org/github.com/felixenescu/date-range)
 
