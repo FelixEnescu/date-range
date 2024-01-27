@@ -11,54 +11,96 @@ import (
 // test dr.DateRange.NewDateRange
 func TestNewDateRange(t *testing.T) {
 	cases := []struct {
-		name string
-		from time.Time
-		to   time.Time
-		want dr.DateRange
+		name     string
+		from     time.Time
+		to       time.Time
+		wantFrom time.Time
+		wantTo   time.Time
 	}{
 		{
-			name: "zero zero",
-			from: time.Time{},
-			to:   time.Time{},
-			want: dr.DateRange{},
+			name:     "zero zero",
+			from:     time.Time{},
+			to:       time.Time{},
+			wantFrom: time.Time{},
+			wantTo:   time.Time{},
 		},
 		{
-			name: "zero non zero",
-			from: time.Time{},
-			to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			want: dr.NewDateRange(time.Time{}, time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
+			name:     "zero non zero utc",
+			from:     time.Time{},
+			to:       time.Date(2019, 1, 1, 2, 3, 4, 5, time.UTC),
+			wantFrom: time.Time{},
+			wantTo:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			name: "non zero zero",
-			from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			to:   time.Time{},
-			want: dr.NewDateRange(time.Time{}, time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
+			name:     "zero non zero est",
+			from:     time.Time{},
+			to:       time.Date(2019, 1, 1, 21, 5, 6, 7, time.FixedZone("EST", -5*60*60)),
+			wantFrom: time.Time{},
+			wantTo:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			name: "non zero non zero equal",
-			from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
+			name:     "non zero utc zero",
+			from:     time.Date(2019, 1, 1, 2, 3, 4, 5, time.UTC),
+			to:       time.Time{},
+			wantFrom: time.Time{},
+			wantTo:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			name: "non zero non zero from before to",
-			from: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
+			name:     "non zero est zero",
+			from:     time.Date(2019, 1, 1, 21, 5, 6, 7, time.FixedZone("EST", -5*60*60)),
+			to:       time.Time{},
+			wantFrom: time.Time{},
+			wantTo:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			name: "non zero non zero from after to",
-			from: time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
-			to:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
-			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
+			name:     "non zero utc non zero utc equal date no time",
+			from:     time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			to:       time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			wantFrom: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			wantTo:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "non zero utc non zero utc equal date time",
+			from:     time.Date(2019, 1, 1, 2, 3, 4, 5, time.UTC),
+			to:       time.Date(2019, 1, 1, 2, 3, 4, 5, time.UTC),
+			wantFrom: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			wantTo:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "non zero utc non zero utc equal date time different location",
+			from:     time.Date(2019, 1, 1, 2, 3, 4, 5, time.FixedZone("EST", -5*60*60)),
+			to:       time.Date(2019, 1, 1, 2, 3, 4, 5, time.FixedZone("EEST", +2*60*60)),
+			wantFrom: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			wantTo:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "non zero utc non zero utc equal date time different location",
+			from:     time.Date(2019, 1, 1, 2, 3, 4, 5, time.FixedZone("EST", -5*60*60)),
+			to:       time.Date(2019, 1, 1, 5, 4, 3, 2, time.FixedZone("EEST", +2*60*60)),
+			wantFrom: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			wantTo:   time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "non zero non zero from before to",
+			from:     time.Date(2019, 1, 1, 0, 7, 0, 0, time.UTC),
+			to:       time.Date(2019, 1, 2, 0, 8, 0, 0, time.FixedZone("EST", -5*60*60)),
+			wantFrom: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			wantTo:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "non zero non zero from after to",
+			from:     time.Date(2019, 1, 2, 5, 0, 0, 0, time.UTC),
+			to:       time.Date(2019, 1, 1, 6, 0, 0, 0, time.UTC),
+			wantFrom: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			wantTo:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
 		},
 	}
 	for _, c := range cases {
 		t.Logf("Running test %s", c.name)
 		t.Run(c.name, func(t *testing.T) {
 			got := dr.NewDateRange(c.from, c.to)
-			if got != c.want {
-				t.Errorf("NewDateRange(%v, %v) = %v, want %v", c.from, c.to, got, c.want)
+			if got.From() != c.wantFrom || got.To() != c.wantTo {
+				t.Errorf("NewDateRange(%v, %v) = %v, want {%v - %v}", c.from, c.to, got, c.wantFrom, c.wantTo)
 			}
 		})
 	}
@@ -96,6 +138,12 @@ func TestMustNewDateRange(t *testing.T) {
 			to:   time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC),
 			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 2, 0, 0, 0, 0, time.UTC)),
 		},
+		{
+			name: "non zero non zero from same day time before to",
+			from: time.Date(2019, 1, 1, 6, 7, 8, 9, time.UTC),
+			to:   time.Date(2019, 1, 1, 2, 3, 8, 9, time.UTC),
+			want: dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
+		},
 	}
 	for _, c := range cases {
 		t.Logf("Running test %s", c.name)
@@ -112,7 +160,7 @@ func TestMustNewDateRange(t *testing.T) {
 		if r := recover(); r == nil {
 			t.Errorf("MustNewDateRange() should have panicked")
 		} else {
-			if r == "from date (2019-01-02 03:04:05.000000006 +0000 UTC) is after to date (2019-01-01 06:05:04.000000003 +0000 UTC)" {
+			if r == "from date (2019-01-02 00:00:00 +0000 UTC) is after to date (2019-01-01 00:00:00 +0000 UTC)" {
 				t.Logf("MustNewDateRange() panicked with correct message: %v", r)
 			} else {
 				t.Errorf("MustNewDateRange() panicked with wrong message: %v", r)
@@ -125,6 +173,62 @@ func TestMustNewDateRange(t *testing.T) {
 		time.Date(2019, 1, 2, 3, 4, 5, 6, time.UTC),
 		time.Date(2019, 1, 1, 6, 5, 4, 3, time.UTC),
 	)
+}
+
+// test dr.DateRange.From
+func TestDateRangeFrom(t *testing.T) {
+	cases := []struct {
+		name string
+		d    dr.DateRange
+		want time.Time
+	}{
+		{
+			name: "zero",
+			d:    dr.DateRange{},
+			want: time.Time{},
+		},
+		{
+			name: "non zero",
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			want: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+	}
+	for _, c := range cases {
+		t.Logf("Running test %s", c.name)
+		t.Run(c.name, func(t *testing.T) {
+			if got := c.d.From(); !reflect.DeepEqual(got, c.want) {
+				t.Errorf("DateRange.From() = %v, want %v", got, c.want)
+			}
+		})
+	}
+}
+
+// test dr.DateRange.To
+func TestDateRangeTo(t *testing.T) {
+	cases := []struct {
+		name string
+		d    dr.DateRange
+		want time.Time
+	}{
+		{
+			name: "zero",
+			d:    dr.DateRange{},
+			want: time.Time{},
+		},
+		{
+			name: "non zero",
+			d:    dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			want: time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC),
+		},
+	}
+	for _, c := range cases {
+		t.Logf("Running test %s", c.name)
+		t.Run(c.name, func(t *testing.T) {
+			if got := c.d.To(); !reflect.DeepEqual(got, c.want) {
+				t.Errorf("DateRange.To() = %v, want %v", got, c.want)
+			}
+		})
+	}
 }
 
 // test dr.DateRange.String

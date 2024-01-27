@@ -43,8 +43,8 @@ func minTime(a, b time.Time) time.Time {
 	return b
 }
 
-// toDate truncate a time to the date.
-func toDate(t time.Time) time.Time {
+// toDateUTC truncate a time to the date and set UTC location.
+func toDateUTC(t time.Time) time.Time {
 	// the correct way to truncate a time to the date is to use
 	// time.Date with the zero values for the time components.
 	// The commonly used time.Truncate(24 * time.Hour) method does not work
@@ -52,5 +52,5 @@ func toDate(t time.Time) time.Time {
 	return time.Date(
 		t.Year(), t.Month(), t.Day(),
 		0, 0, 0, 0,
-		t.Location())
+		time.UTC)
 }
