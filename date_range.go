@@ -36,24 +36,41 @@ type DateRange struct {
 	to   time.Time
 }
 
-// NewDateRange returns a new DateRange from the given dates. This automatically order input dates
-// and truncates the time portion of the dates.
-// Use MustNewDateRange if you want to panic on invalid input.
+// NewDateRange returns a new DateRange from the given dates. This automatically
+// order input dates and truncates the time portion of the dates, ignoring the
+// time zone (for example 2024-01-26 9pm EST will still be the 26th of January 2024).
+// Use MustNewDateRange if you want to panic if `from` date if after the `to`date .
 func NewDateRange(from, to time.Time) DateRange {
+	from = toDateUTC(from)
+	to = toDateUTC(to)
 	return DateRange{
-		from: toDate(minTime(from, to)),
-		to:   toDate(maxTime(from, to)),
+		from: minTime(from, to),
+		to:   maxTime(from, to),
 	}
 }
 
-// MustNewDateRange returns a new DateRange from the given dates. This automatically truncates the time
-// portion of the dates. This panics if the from date is after the to date.
+// MustNewDateRange returns a new DateRange from the given dates. This automatically
+// truncates the time portion of the dates, ignoring the time zone (for example
+// 2024-01-26 9pm EST will still be the 26th of January 2024). This panics if the
+// truncated `from` date is after the truncated `to` date.
 // Use NewDateRange if you want to automatically order input dates.
 func MustNewDateRange(from, to time.Time) DateRange {
+	from = toDateUTC(from)
+	to = toDateUTC(to)
 	if from.After(to) {
 		panic(fmt.Sprintf("from date (%s) is after to date (%s)", from, to))
 	}
 	return NewDateRange(from, to)
+}
+
+// From returns the start date of the range, as midnight of that day, UTC time.
+func (d DateRange) From() time.Time {
+	return d.from
+}
+
+// To returns the end date of the range, as midnight of that day, UTC time.
+func (d DateRange) To() time.Time {
+	return d.to
 }
 
 // String returns a string representation of the DateRange
