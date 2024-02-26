@@ -21,15 +21,17 @@ func NewDateRanges(dataRanges ...DateRange) DateRanges {
 }
 
 // ToSlice returns the members of the collection as a slice.
-// Items are guaranteed to be sorted and non-overlapping. Any adjacent periods are merged.
+// Items are guaranteed to be sorted, non-overlapping and non-zero.
+// Any adjacent periods are merged.
 func (drs *DateRanges) ToSlice() []DateRange {
 	copySlice := make([]DateRange, len(drs.dr))
 	copy(copySlice, drs.dr)
 	return copySlice
 }
 
-// String returns a string representation of the collection
-// Items are guaranteed to be sorted and non-overlapping. Any adjacent periods are merged.
+// String returns a string representation of the collection.
+// Items are guaranteed to be sorted, non-overlapping and non-zero.
+// Any adjacent periods are merged.
 func (drs DateRanges) String() string {
 	if drs.IsZero() {
 		return "[]"
@@ -114,9 +116,9 @@ func (drs *DateRanges) IsAnyDateIn(other DateRange) bool {
 	return false
 }
 
-// IsAllDateIn returns true if all dates in the given DateRange are in the collection
+// IsAllDatesIn returns true if all dates in the given DateRange are in the collection
 // Zero DateRange is always considered to be in the collection
-func (drs *DateRanges) IsAllDateIn(other DateRange) bool {
+func (drs *DateRanges) IsAllDatesIn(other DateRange) bool {
 	if other.IsZero() {
 		return true
 	}

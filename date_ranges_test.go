@@ -699,8 +699,8 @@ func TestDateRangesIsAnyDateIn(t *testing.T) {
 	}
 }
 
-// test dr.DateRanges.IsAnyDateIn
-func TestDateRangesIsAllDateIn(t *testing.T) {
+// test dr.DateRanges.IsAllDatesIn
+func TestDateRangesIsAllDatesIn(t *testing.T) {
 	cases := []struct {
 		name string
 		drs  []dr.DateRange
@@ -783,8 +783,8 @@ func TestDateRangesIsAllDateIn(t *testing.T) {
 		t.Logf("Running test %s", c.name)
 		t.Run(c.name, func(t *testing.T) {
 			drs := dr.NewDateRanges(c.drs...)
-			if drs.IsAllDateIn(c.dr) != c.want {
-				t.Errorf("NewDateRanges(%v).IsAllDateIn(%v) = %v, want %v", c.drs, c.dr, drs.IsAllDateIn(c.dr), c.want)
+			if drs.IsAllDatesIn(c.dr) != c.want {
+				t.Errorf("NewDateRanges(%v).IsAllDatesIn(%v) = %v, want %v", c.drs, c.dr, drs.IsAllDatesIn(c.dr), c.want)
 			}
 		})
 	}
