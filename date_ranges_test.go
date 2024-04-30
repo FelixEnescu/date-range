@@ -789,3 +789,127 @@ func TestDateRangesIsAllDatesIn(t *testing.T) {
 		})
 	}
 }
+
+// test dr.DateRanges.SplitInclusive
+func TestDateRangesSplitInclusive(t *testing.T) {
+	cases := []struct {
+		name   string
+		drs    []dr.DateRange
+		now    time.Time
+		before []dr.DateRange
+		after  []dr.DateRange
+	}{
+		{
+			name:   "empty",
+			drs:    []dr.DateRange{},
+			now:    time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			before: []dr.DateRange{},
+			after:  []dr.DateRange{},
+		},
+		{
+			name:   "empty empty",
+			drs:    []dr.DateRange{},
+			now:    time.Time{},
+			before: []dr.DateRange{},
+			after:  []dr.DateRange{},
+		},
+		{
+			name: "all before",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			},
+			now: time.Date(2019, 12, 31, 0, 0, 0, 0, time.UTC),
+			before: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			},
+			after: []dr.DateRange{},
+		},
+		{
+			name: "all after",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			},
+			now:    time.Date(2018, 1, 8, 0, 0, 0, 0, time.UTC),
+			before: []dr.DateRange{},
+			after: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 5, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 7, 0, 0, 0, 0, time.UTC)),
+			},
+		},
+		{
+			name: "inside no range split",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 17, 0, 0, 0, 0, time.UTC)),
+			},
+			now: time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC),
+			before: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+			},
+			after: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 17, 0, 0, 0, 0, time.UTC)),
+			},
+		},
+		{
+			name: "inside range split",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 27, 0, 0, 0, 0, time.UTC)),
+			},
+			now: time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC),
+			before: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 3, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC)),
+			},
+			after: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 27, 0, 0, 0, 0, time.UTC)),
+			},
+		},
+		{
+			name: "inside last range day",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 13, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 27, 0, 0, 0, 0, time.UTC)),
+			},
+			now: time.Date(2019, 1, 13, 0, 0, 0, 0, time.UTC),
+			before: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 13, 0, 0, 0, 0, time.UTC)),
+			},
+			after: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 13, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 13, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 27, 0, 0, 0, 0, time.UTC)),
+			},
+		},
+		{
+			name: "inside first range day",
+			drs: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 13, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 27, 0, 0, 0, 0, time.UTC)),
+			},
+			now: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+			before: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)),
+			},
+			after: []dr.DateRange{
+				dr.NewDateRange(time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 13, 0, 0, 0, 0, time.UTC)),
+				dr.NewDateRange(time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 27, 0, 0, 0, 0, time.UTC)),
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Logf("Running test %s", c.name)
+		t.Run(c.name, func(t *testing.T) {
+			drs := dr.NewDateRanges(c.drs...)
+			before, after := drs.SplitInclusive(c.now)
+			if !reflect.DeepEqual(before.ToSlice(), c.before) {
+				t.Errorf("NewDateRanges(%v).Split(%v) before = %v, want %v", c.drs, c.now, before, c.before)
+			}
+			if !reflect.DeepEqual(after.ToSlice(), c.after) {
+				t.Errorf("NewDateRanges(%v).Split(%v) after = %v, want %v", c.drs, c.now, after, c.after)
+			}
+		})
+	}
+}

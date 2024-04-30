@@ -130,6 +130,24 @@ func (drs *DateRanges) IsAllDatesIn(other DateRange) bool {
 	return false
 }
 
+// SplitInclusive splits the collection into two collections based on the given date
+// The given date is included in both collections
+func (drs *DateRanges) SplitInclusive(date time.Time) (DateRanges, DateRanges) {
+	before := NewDateRanges()
+	after := NewDateRanges()
+	for _, dr := range drs.dr {
+		if dr.to.Before(date) {
+			before.Append(dr)
+		} else if dr.from.After(date) {
+			after.Append(dr)
+		} else {
+			before.Append(DateRange{from: dr.from, to: date})
+			after.Append(DateRange{from: date, to: dr.to})
+		}
+	}
+	return before, after
+}
+
 // normalize sorts the collection and merges overlapping periods
 func (drs *DateRanges) normalize() *DateRanges {
 	if len(drs.dr) == 0 {
