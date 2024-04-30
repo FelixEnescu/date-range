@@ -168,7 +168,7 @@ func main() {
  - **Contains(date time.Time) bool:** Returns true if the given date is in the collection.
  - **IsAnyDateIn(date time.Time) bool:** Returns true if any date in the given DateRange is in the collection. Zero DateRange is always considered to be in the collection.
  - **IsAllDatesIn(date time.Time) bool:** Returns true if all dates in the given DateRange are in the collection. Zero DateRange is always considered to be in the collection.
-
+ - **SplitInclusive(date time.Time) (DateRanges, DateRanges):** Splits the collection into two collections at the given date. The given date is included in both collections.
 
 #### Use Cases and Examples
 
@@ -271,5 +271,38 @@ func main() {
 		fmt.Println(newReservation, "there is no availability for new reservations")
 	}
 	// {2019-01-10 - 2019-01-17} there is no availability for new reservations
+}
+```
+
+ - **Split a collection at a given date**
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+
+	dr "github.com/felixenescu/date-range"
+)
+
+func main() {
+
+	drs := []dr.DateRange{
+		dr.NewDateRange(time.Date(2019, 1, 9, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 12, 0, 0, 0, 0, time.UTC)),
+		dr.NewDateRange(time.Date(2019, 1, 13, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 15, 0, 0, 0, 0, time.UTC)),
+		dr.NewDateRange(time.Date(2019, 1, 20, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 24, 0, 0, 0, 0, time.UTC)),
+		dr.NewDateRange(time.Date(2019, 1, 10, 0, 0, 0, 0, time.UTC), time.Date(2019, 1, 11, 0, 0, 0, 0, time.UTC)),
+	}
+	reservations := dr.NewDateRanges(drs...)
+	fmt.Println(reservations)
+	// [{2019-01-09 - 2019-01-15} {2019-01-20 - 2019-01-24}]
+
+	splitDate := time.Date(2019, 1, 14, 0, 0, 0, 0, time.UTC)
+	before, after := reservations.SplitInclusive(splitDate)
+	fmt.Println("Before:", before)
+	// [{2019-01-09 - 2019-01-14}]
+	fmt.Println("After:", after)
+	// [{2019-01-14 - 2019-01-15} {2019-01-20 - 2019-01-24}]
 }
 ```

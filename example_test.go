@@ -212,3 +212,14 @@ func ExampleDateRanges_IsAllDatesIn() {
 	))
 	// Output: true
 }
+
+func ExampleDateRanges_SplitInclusive() {
+	// Create a new DateRanges
+	drs := daterange.NewDateRanges(
+		daterange.NewDateRange(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)),
+		daterange.NewDateRange(time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC), time.Date(2024, 1, 27, 0, 0, 0, 0, time.UTC)),
+	)
+	before, after := drs.SplitInclusive(time.Date(2024, 1, 20, 0, 0, 0, 0, time.UTC))
+	fmt.Println(before.String(), after.String())
+	// Output: [{2024-01-01 - 2024-01-03} {2024-01-15 - 2024-01-20}] [{2024-01-20 - 2024-01-27}]
+}
