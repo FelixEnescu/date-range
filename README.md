@@ -39,6 +39,7 @@ Processing and manipulation of date intervals
 
 **DateRange** represents an **inclusive** range of dates. It is defined by two time.Time values, `from` and `to`.
 
+**Note:** Only the date portion of the time.Time values is compared. The time portion is ignored.
 
 #### Constructors
 

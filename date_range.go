@@ -40,6 +40,7 @@ type DateRange struct {
 // order input dates and truncates the time portion of the dates, ignoring the
 // time zone (for example 2024-01-26 9pm EST will still be the 26th of January 2024).
 // Use MustNewDateRange if you want to panic if `from` date if after the `to`date .
+// Note: Only the date portion of the time.Time values is compared. The time portion is ignored.
 func NewDateRange(from, to time.Time) DateRange {
 	from = toDateUTC(from)
 	to = toDateUTC(to)
@@ -54,6 +55,7 @@ func NewDateRange(from, to time.Time) DateRange {
 // 2024-01-26 9pm EST will still be the 26th of January 2024). This panics if the
 // truncated `from` date is after the truncated `to` date.
 // Use NewDateRange if you want to automatically order input dates.
+// Note: Only the date portion of the time.Time values is compared. The time portion is ignored.
 func MustNewDateRange(from, to time.Time) DateRange {
 	from = toDateUTC(from)
 	to = toDateUTC(to)

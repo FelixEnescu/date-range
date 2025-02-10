@@ -27,4 +27,6 @@ SOFTWARE.
 // date intervals efficiently and effectively. This library simplifies operations
 // such as comparing dates, checking overlaps, and processing date ranges in Go
 // applications.
+//
+// Note: Only the date portion of the time.Time values is compared. The time portion is ignored.
 package daterange
